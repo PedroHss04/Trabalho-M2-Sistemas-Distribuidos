@@ -1,0 +1,80 @@
+# e8_coordenacao — 2026-10-14 22:22:15 — log em resultados/e8_coordenacao_20261014_222215.log
+
+=================== 1. Termo x revisão (relógios lógicos) ao longo de uma troca de líder ===================
+escrita-1: revision=12012  raft_term=3
+escrita-2: revision=12013  raft_term=3
+>> derrubando o líder etcd1 (docker kill)
+saudável em 0.85 s: líder etcd2, 2 membros respondendo
+escrita-3: revision=12014  raft_term=4
+escrita-4: revision=12015  raft_term=4
+>> a revisão continua crescendo sem saltos estranhos; o termo só muda quando muda o líder.
+>> MVCC: a revisão também versiona os dados (leitura de uma revisão passada):
+   get /e8/relogio (atual, mod_revision=12015): escrita-4
+   get /e8/relogio --rev=12014:            escrita-3
+
+=================== 2a. Exclusão mútua: etcdctl lock --ttl=10 trava ===================
+   A detém: trava/3289a13d272d6707  
+   B (esperando) imprimiu: ''
+   chaves de espera (ordenadas pela create_revision = fila justa / fencing token):
+      trava/3289a13d272d6707  create_revision= 12016  lease= 3641619057728120583
+      trava/70d5a13d2694b52f  create_revision= 12017  lease= 8130581986299655471
+   [lock/kill #1] B assumiu 7.567 s depois do kill em A: trava/70d5a13d2694b52f  
+   [lock/kill #2] B assumiu 10.127 s depois do kill em A: trava/624ca13d26e0a430  
+   [lock/kill #3] B assumiu 7.903 s depois do kill em A: trava/3289a13d272d673f  
+   [lock/kill #4] B assumiu 9.249 s depois do kill em A: trava/70d5a13d2694b575  
+   [lock/kill #5] B assumiu 7.427 s depois do kill em A: trava/70d5a13d2694b591  
+   A detém: trava/624ca13d26e0a48b  
+   B (esperando) imprimiu: ''
+   chaves de espera (ordenadas pela create_revision = fila justa / fencing token):
+      trava/3289a13d272d6784  create_revision= 12037  lease= 3641619057728120708
+      trava/624ca13d26e0a48b  create_revision= 12035  lease= 7083213597964280971
+   [lock/stop #1] B assumiu 0.495 s depois do stop em A: trava/3289a13d272d6784  
+
+=================== 2b. Eleição de líder de aplicação: etcdctl elect eleicao (sessão com TTL padrão de 60 s) ===================
+   A detém: eleicao/3289a13d272d678e candidatoA 
+   B (esperando) imprimiu: ''
+   chaves de espera (ordenadas pela create_revision = fila justa / fencing token):
+      eleicao/3289a13d272d678e  create_revision= 12039  lease= 3641619057728120718
+      eleicao/3289a13d272d6793  create_revision= 12040  lease= 3641619057728120723
+   [elect/kill #1] B assumiu 57.778 s depois do kill em A: eleicao/3289a13d272d6793 candidatoB 
+   [elect/kill #2] B assumiu 60.039 s depois do kill em A: eleicao/3289a13d272d6811 candidatoB 
+   [elect/kill #3] B assumiu 41.577 s depois do kill em A: eleicao/70d5a13d2694b6a3 candidatoB 
+   [elect/kill #4] B assumiu 43.436 s depois do kill em A: eleicao/70d5a13d2694b70c candidatoB 
+   [elect/kill #5] B assumiu 45.002 s depois do kill em A: eleicao/70d5a13d2694b773 candidatoB 
+   A detém: eleicao/3289a13d272d698f candidatoA 
+   B (esperando) imprimiu: ''
+   chaves de espera (ordenadas pela create_revision = fila justa / fencing token):
+      eleicao/3289a13d272d698f  create_revision= 12059  lease= 3641619057728121231
+      eleicao/70d5a13d2694b7d9  create_revision= 12061  lease= 8130581986299656153
+   [elect/stop #1] B assumiu 0.476 s depois do stop em A: eleicao/70d5a13d2694b7d9 candidatoB 
+>> observador (elect -l) viu a sequência de líderes:
+   eleicao/3289a13d272d678e
+   candidatoA
+   eleicao/3289a13d272d6793
+   candidatoB
+   eleicao/3289a13d272d67d5
+   candidatoA
+   eleicao/3289a13d272d6811
+   candidatoB
+   eleicao/3289a13d272d6853
+   candidatoA
+   eleicao/70d5a13d2694b6a3
+   candidatoB
+   eleicao/3289a13d272d68bc
+   candidatoA
+   eleicao/70d5a13d2694b70c
+   candidatoB
+   eleicao/624ca13d26e0a62d
+   candidatoA
+   eleicao/70d5a13d2694b773
+   candidatoB
+   eleicao/3289a13d272d698f
+   candidatoA
+   eleicao/70d5a13d2694b7d9
+   candidatoB
+
+=================== Resumo do failover (s) ===================
+lock  kill n=5  média=8.455  desvio=1.181  mín=7.427  máx=10.127
+lock  stop n=1  média=0.495  desvio=0.000  mín=0.495  máx=0.495
+elect kill n=5  média=49.566  desvio=8.651  mín=41.577  máx=60.039
+elect stop n=1  média=0.476  desvio=0.000  mín=0.476  máx=0.476

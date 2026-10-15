@@ -1,0 +1,50 @@
+# e3_replicacao — 2026-10-14 22:09:55 — log em resultados/e3_replicacao_20261014_220955.log
+
+=================== watch em etcd3 (contêiner avulso), put em etcd1, get em etcd2 ===================
+OK
+>> get no etcd2 (endpoint único):
+/e3/x
+escrito-no-etcd1-22:09:57
+>> notificação recebida pelo watch aberto no etcd3:
+{"Header":{"cluster_id":6775757553465404157,"member_id":12051858507143508181,"revision":214,"raft_term":2},"Events":[{"kv":{"key":"L2UzL3g=","create_revision":214,"mod_revision":214,"version":1,"value":"ZXNjcml0by1uby1ldGNkMS0yMjowOTo1Nw=="}}],"CompactRevision":0,"Canceled":false,"Created":false}
+
+=================== Tempo de propagação: put no líder -> valor visível (leitura local) em cada seguidor ===================
+líder: etcd1; seguidores: ['etcd2', 'etcd3']
+rep  1: put=   8.6 ms  etcd2 vê em 9.2 ms  etcd3 vê em 9.0 ms
+rep  2: put=   4.9 ms  etcd2 vê em 6.1 ms  etcd3 vê em 5.9 ms
+rep  3: put=   5.3 ms  etcd2 vê em 5.8 ms  etcd3 vê em 5.9 ms
+rep  4: put=   7.7 ms  etcd2 vê em 8.8 ms  etcd3 vê em 8.9 ms
+rep  5: put=   6.7 ms  etcd2 vê em 7.6 ms  etcd3 vê em 9.1 ms
+rep  6: put=   5.0 ms  etcd2 vê em 7.6 ms  etcd3 vê em 6.4 ms
+rep  7: put=   5.2 ms  etcd2 vê em 6.0 ms  etcd3 vê em 5.9 ms
+rep  8: put=   6.4 ms  etcd2 vê em 7.8 ms  etcd3 vê em 7.7 ms
+rep  9: put=   5.8 ms  etcd2 vê em 7.6 ms  etcd3 vê em 7.5 ms
+rep 10: put=   8.1 ms  etcd2 vê em 8.6 ms  etcd3 vê em 9.2 ms
+rep 11: put=   6.7 ms  etcd2 vê em 8.6 ms  etcd3 vê em 8.5 ms
+rep 12: put=   9.5 ms  etcd2 vê em 10.7 ms  etcd3 vê em 10.9 ms
+rep 13: put=   5.1 ms  etcd2 vê em 6.5 ms  etcd3 vê em 5.5 ms
+rep 14: put=   6.3 ms  etcd2 vê em 7.7 ms  etcd3 vê em 7.8 ms
+rep 15: put=   6.2 ms  etcd2 vê em 7.4 ms  etcd3 vê em 7.7 ms
+rep 16: put=   7.9 ms  etcd2 vê em 8.6 ms  etcd3 vê em 8.1 ms
+rep 17: put=   5.3 ms  etcd2 vê em 6.6 ms  etcd3 vê em 6.7 ms
+rep 18: put=   9.6 ms  etcd2 vê em 10.8 ms  etcd3 vê em 10.9 ms
+rep 19: put=   4.8 ms  etcd2 vê em 6.1 ms  etcd3 vê em 5.9 ms
+rep 20: put=   8.4 ms  etcd2 vê em 10.4 ms  etcd3 vê em 9.3 ms
+
+put no líder (ms): n=20  média=6.67  desvio=1.57  mín=4.80  máx=9.60
+visível em etcd2 (ms): n=20  média=7.92  desvio=1.54  mín=5.80  máx=10.80
+visível em etcd3 (ms): n=20  média=7.84  desvio=1.64  mín=5.50  máx=10.90
+CSV salvo em /resultados/e3_propagacao_20261015_011003.csv
+
+=================== check perf --load=s (referência de desempenho; ~60 s) + memória durante a carga ===================
+
+>> memória no meio do check perf:
+
+etcd1     114.8MiB / 256MiB   28.03%
+etcd2     52.27MiB / 256MiB   17.82%
+etcd3     52.23MiB / 256MiB   18.98%
+
+PASS: Throughput is 151 writes/s
+PASS: Slowest request took 0.082586s
+PASS: Stddev is 0.003510s
+PASS

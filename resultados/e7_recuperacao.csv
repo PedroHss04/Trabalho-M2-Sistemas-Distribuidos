@@ -1,0 +1,8 @@
+cenario,repeticao,membro,entradas_atras,reingresso_s,sincronizou_apos_reingresso_ms
+reconexao,1,etcd1,1008,1.341,23.4
+reconexao,2,etcd2,1007,1.158,73.8
+reconexao,3,etcd1,1008,1.263,23.1
+reconexao,4,etcd3,1009,1.755,61.9
+reconexao,5,etcd2,1008,1.118,61.1
+snapshot_1000,1,etcd3,12024,0.53,0.0
+log_100000,1,etcd3,12023,0.588,0.0

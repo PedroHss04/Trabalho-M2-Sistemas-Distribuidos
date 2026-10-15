@@ -1,0 +1,53 @@
+# e1_topologia — 2026-10-14 22:09:41 — log em resultados/e1_topologia_20261014_220941.log
+
+=================== Versões ===================
+etcd Version: 3.5.17
+Git SHA: 507c0de
+Go Version: go1.22.9
+Docker Compose version v5.6.0
+
+=================== member list (quem faz parte do cluster) ===================
++------------------+---------+-------+-------------------------+-------------------------+------------+
+|        ID        | STATUS  | NAME  |       PEER ADDRS        |      CLIENT ADDRS       | IS LEARNER |
++------------------+---------+-------+-------------------------+-------------------------+------------+
+| 729febf16625624c | started | etcd2 | http://172.30.0.32:2380 | http://172.31.0.32:2379 |      false |
+| a740cd75718ef0d5 | started | etcd3 | http://172.30.0.33:2380 | http://172.31.0.33:2379 |      false |
+| f7c63021767e3289 | started | etcd1 | http://172.30.0.31:2380 | http://172.31.0.31:2379 |      false |
++------------------+---------+-------+-------------------------+-------------------------+------------+
+
+=================== endpoint status (líder, termo e índice do Raft de cada membro) ===================
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+|        ENDPOINT         |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+| http://172.31.0.31:2379 | f7c63021767e3289 |  3.5.17 |   20 kB |      true |      false |         2 |        179 |                179 |        |
+| http://172.31.0.32:2379 | 729febf16625624c |  3.5.17 |   20 kB |     false |      false |         2 |        179 |                179 |        |
+| http://172.31.0.33:2379 | a740cd75718ef0d5 |  3.5.17 |   20 kB |     false |      false |         2 |        179 |                179 |        |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+
+=================== endpoint health ===================
++-------------------------+--------+------------+-------+
+|        ENDPOINT         | HEALTH |    TOOK    | ERROR |
++-------------------------+--------+------------+-------+
+| http://172.31.0.31:2379 |   true | 1.601012ms |       |
+| http://172.31.0.33:2379 |   true | 1.937097ms |       |
+| http://172.31.0.32:2379 |   true | 1.973262ms |       |
++-------------------------+--------+------------+-------+
+
+=================== Endereços por rede (interna = Raft/2380, clientes = API/2379) ===================
+etcd1  t5-etcd-enfasec_clientes=172.31.0.31 t5-etcd-enfasec_interna=172.30.0.31
+etcd2  t5-etcd-enfasec_clientes=172.31.0.32 t5-etcd-enfasec_interna=172.30.0.32
+etcd3  t5-etcd-enfasec_clientes=172.31.0.33 t5-etcd-enfasec_interna=172.30.0.33
+app1  t5-etcd-enfasec_clientes=172.31.0.101
+app2  t5-etcd-enfasec_clientes=172.31.0.102
+app3  t5-etcd-enfasec_clientes=172.31.0.103
+cliente  t5-etcd-enfasec_clientes=172.31.0.100
+
+=================== Memória: limite declarado x uso real (R1) ===================
+NAME      MEM USAGE / LIMIT   MEM %     CPU %
+app2      13.68MiB / 64MiB    21.38%    0.00%
+app3      16.31MiB / 64MiB    25.49%    0.00%
+app1      13.68MiB / 64MiB    21.38%    0.02%
+etcd1     21.05MiB / 256MiB   8.22%     1.84%
+cliente   3.184MiB / 64MiB    4.97%     0.00%
+etcd2     22.8MiB / 256MiB    8.91%     1.40%
+etcd3     24.35MiB / 256MiB   9.51%     6.24%

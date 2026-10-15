@@ -28,6 +28,14 @@ def prefix_end(prefix: str) -> str:
     return base64.b64encode(bytes(b)).decode()
 
 
+class Compactado(Exception):
+    """O watch pediu uma revisão anterior à compactação do histórico (MVCC)."""
+
+    def __init__(self, compact_revision):
+        super().__init__(f"revisão compactada até {compact_revision}")
+        self.compact_revision = compact_revision
+
+
 class Etcd:
     def __init__(self, endpoints=None, timeout=2.0):
         eps = endpoints or os.environ.get("ETCD_ENDPOINTS", DEFAULT_EPS)
@@ -35,20 +43,31 @@ class Etcd:
         self.timeout = timeout
         self.atual = 0  # índice do endpoint em uso (failover circular)
 
+    def _post_em(self, ep, path, body, timeout=None):
+        """POST em UM endpoint, sem failover (para observar um membro específico)."""
+        req = urllib.request.Request(
+            ep.rstrip("/") + path, data=json.dumps(body).encode(),
+            headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=timeout or self.timeout) as r:
+            return json.loads(r.read() or b"{}")
+
     def _post(self, path, body, timeout=None):
         ultimo_erro = None
         for _ in range(len(self.endpoints)):
             ep = self.endpoints[self.atual]
-            req = urllib.request.Request(
-                ep + path, data=json.dumps(body).encode(),
-                headers={"Content-Type": "application/json"})
             try:
-                with urllib.request.urlopen(req, timeout=timeout or self.timeout) as r:
-                    return json.loads(r.read() or b"{}")
+                return self._post_em(ep, path, body, timeout)
             except (urllib.error.URLError, OSError, TimeoutError) as e:
                 ultimo_erro = f"{ep}: {e}"
                 self.atual = (self.atual + 1) % len(self.endpoints)
         raise ConnectionError(ultimo_erro)
+
+    def status_de(self, ep, timeout=0.5):
+        """/v3/maintenance/status de UM endpoint (sem failover): líder, termo e índices do Raft."""
+        s = self._post_em(ep, "/v3/maintenance/status", {}, timeout)
+        return {"id": s["header"]["member_id"], "lider": s.get("leader", "0"),
+                "termo": int(s.get("raftTerm", 0)), "indice": int(s.get("raftIndex", 0)),
+                "aplicado": int(s.get("raftAppliedIndex", 0)), "learner": bool(s.get("isLearner"))}
 
     def put(self, key, value):
         r = self._post("/v3/kv/put", {"key": b64(key), "value": b64(value)})
@@ -70,6 +89,7 @@ class Etcd:
         """Gerador de eventos (tipo, chave, valor, revisão). Reconecta em outro
         endpoint se a conexão cair, retomando de last_rev+1 (sem perder eventos)."""
         prox = start_revision
+        falhas = 0  # tentativas seguidas sem conseguir abrir o watch (backoff exponencial)
         while True:
             ep = self.endpoints[self.atual]
             req_body = {"create_request": {"key": b64(prefix), "range_end": prefix_end(prefix),
@@ -81,11 +101,16 @@ class Etcd:
                 headers={"Content-Type": "application/json"})
             try:
                 with urllib.request.urlopen(req, timeout=15) as resp:
+                    falhas = 0
                     yield ("conectado", ep, None, prox)
                     for linha in resp:
                         if not linha.strip():
                             continue
                         res = json.loads(linha).get("result", {})
+                        if res.get("canceled"):
+                            # revisão pedida já foi compactada: o histórico não existe mais
+                            # e quem chamou precisa reler o estado completo (get) e reabrir o watch
+                            raise Compactado(int(res.get("compact_revision", 0)))
                         eventos = res.get("events", [])
                         if not eventos and not res.get("created") and res.get("header", {}).get("revision"):
                             # progress notify: nada mudou até essa revisão
@@ -100,4 +125,6 @@ class Etcd:
             except (urllib.error.URLError, OSError, ValueError) as e:
                 yield ("desconectado", ep, str(e), prox)
             self.atual = (self.atual + 1) % len(self.endpoints)
-            time.sleep(0.5)
+            # 0,5 s na primeira tentativa (failover rápido), dobrando até 5 s se nenhum membro responde
+            time.sleep(min(0.5 * 2 ** (falhas // len(self.endpoints)), 5))
+            falhas += 1

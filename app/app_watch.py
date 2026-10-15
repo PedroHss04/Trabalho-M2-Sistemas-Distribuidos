@@ -12,7 +12,7 @@ import sys
 import time
 
 sys.path.insert(0, os.path.dirname(__file__))
-from etcdhttp import Etcd  # noqa: E402
+from etcdhttp import Compactado, Etcd  # noqa: E402
 
 NOME = os.environ.get("APP_NAME", "app")
 PREFIXO = "/config/"
@@ -22,17 +22,30 @@ def log(msg):
     print(f"{time.strftime('%H:%M:%S')} [{NOME}] {msg}", flush=True)
 
 
-def main():
-    etcd = Etcd()
+def ler_estado(etcd):
     while True:
         try:
-            config, rev = etcd.get_prefix(PREFIXO)
-            break
+            return etcd.get_prefix(PREFIXO)
         except ConnectionError as e:
             log(f"etcd indisponível ({e}); tentando de novo")
             time.sleep(1)
-    log(f"configuração inicial (revisão {rev}): {config}")
 
+
+def main():
+    etcd = Etcd()
+    config, rev = ler_estado(etcd)
+    log(f"configuração inicial (revisão {rev}): {config}")
+    while True:
+        try:
+            acompanhar(etcd, config, rev)
+        except Compactado as e:
+            # o histórico entre a última revisão vista e a compactação se perdeu:
+            # relê o estado inteiro (snapshot) e volta a acompanhar dali em diante
+            config, rev = ler_estado(etcd)
+            log(f"watch cancelado ({e}); estado relido na revisão {rev}: {config}")
+
+
+def acompanhar(etcd, config, rev):
     for tipo, chave, valor, revisao in etcd.watch_prefix(PREFIXO, start_revision=rev + 1):
         if tipo == "conectado":
             log(f"watch aberto em {chave} a partir da revisão {revisao}")

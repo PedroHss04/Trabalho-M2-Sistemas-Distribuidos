@@ -1,0 +1,109 @@
+# e7_recuperacao — 2026-10-14 22:15:42 — log em resultados/e7_recuperacao_20261014_221542.log
+
+=================== Parte 1: reconexão de um líder isolado (5 repetições, 1000 escritas durante o isolamento) ===================
+  rep 1: {"membro": "etcd1", "lider": "etcd2", "termo": 15, "aplicado_membro": 10919, "aplicado_lider": 10919, "reingresso_s": 1.341, "sincronizou_apos_reingresso_ms": 23.4, "total_desde_pronto_s": 1.364}
+  rep 2: {"membro": "etcd2", "lider": "etcd1", "termo": 16, "aplicado_membro": 11931, "aplicado_lider": 11931, "reingresso_s": 1.158, "sincronizou_apos_reingresso_ms": 73.8, "total_desde_pronto_s": 1.232}
+  rep 3: {"membro": "etcd1", "lider": "etcd3", "termo": 17, "aplicado_membro": 12945, "aplicado_lider": 12945, "reingresso_s": 1.263, "sincronizou_apos_reingresso_ms": 23.1, "total_desde_pronto_s": 1.286}
+  rep 4: {"membro": "etcd3", "lider": "etcd2", "termo": 18, "aplicado_membro": 13960, "aplicado_lider": 13959, "reingresso_s": 1.755, "sincronizou_apos_reingresso_ms": 61.9, "total_desde_pronto_s": 1.817}
+  rep 5: {"membro": "etcd2", "lider": "etcd1", "termo": 19, "aplicado_membro": 14971, "aplicado_lider": 14971, "reingresso_s": 1.118, "sincronizou_apos_reingresso_ms": 61.1, "total_desde_pronto_s": 1.179}
+
+tempo de catch-up após reingresso (ms): n=5  média=48.660  desvio=23.735  mín=23.100  máx=73.800
+>> estado final idêntico nas réplicas (mesmo hash do keyspace na mesma revisão):
++-------------------------+------------+
+|        ENDPOINT         |    HASH    |
++-------------------------+------------+
+| http://172.31.0.31:2379 | 1810685005 |
+| http://172.31.0.32:2379 | 1810685005 |
+| http://172.31.0.33:2379 | 1810685005 |
++-------------------------+------------+
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+|        ENDPOINT         |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+| http://172.31.0.31:2379 | f7c63021767e3289 |  3.5.17 |   29 MB |      true |      false |        19 |      14974 |              14974 |        |
+| http://172.31.0.32:2379 | 729febf16625624c |  3.5.17 |   29 MB |     false |      false |        19 |      14974 |              14974 |        |
+| http://172.31.0.33:2379 | a740cd75718ef0d5 |  3.5.17 |   29 MB |     false |      false |        19 |      14974 |              14974 |        |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+
+=================== Parte 2a: SNAPSHOT_COUNT=1000 (snapshot a cada 1000 entradas; log antigo é compactado) ===================
+ Container cliente Stopping 
+ Container app3 Stopping 
+ Container app1 Stopping 
+ Container app2 Stopping 
+ Container app3 Stopped 
+ Container app3 Removing 
+ Container app3 Removed 
+ Container cliente Stopped 
+ Container cliente Removing 
+ Container cliente Removed 
+ Container app2 Stopped 
+ Container app2 Removing 
+ Container app2 Removed 
+ Container app1 Stopped 
+ Container app1 Removing 
+ Container app1 Removed 
+ Container etcd1 Stopping 
+ Container etcd2 Stopping 
+ Container etcd3 Stopping 
+ Container etcd2 Stopped 
+ Container etcd2 Removing 
+ Container etcd2 Removed 
+ Container etcd3 Stopped 
+ Container etcd3 Removing 
+ Container etcd3 Removed 
+ Container etcd1 Stopped 
+ Container etcd1 Removing 
+ Container etcd1 Removed 
+ Network t5-etcd-enfasec_clientes Removing 
+ Network t5-etcd-enfasec_interna Removing 
+ Network t5-etcd-enfasec_clientes Removed 
+ Network t5-etcd-enfasec_interna Removed 
+ Network t5-etcd-enfasec_clientes Creating 
+ Network t5-etcd-enfasec_interna Creating 
+ Network t5-etcd-enfasec_clientes Creating 
+ Network t5-etcd-enfasec_interna Creating 
+ Network t5-etcd-enfasec_clientes Created 
+ Network t5-etcd-enfasec_clientes Created 
+ Container cliente Creating 
+ Network t5-etcd-enfasec_interna Created 
+ Network t5-etcd-enfasec_interna Created 
+ Container etcd1 Creating 
+ Container etcd2 Creating 
+ Container etcd3 Creating 
+ Container cliente Created 
+ Container etcd1 Created 
+ Container etcd3 Created 
+ Container etcd2 Created 
+ Container app3 Creating 
+ Container app1 Creating 
+ Container app2 Creating 
+ Container app3 Created 
+ Container app1 Created 
+ Container app2 Created 
+ Container etcd3 Starting 
+ Container etcd1 Starting 
+ Container cliente Starting 
+ Container etcd2 Starting 
+ Container etcd3 Started 
+ Container etcd1 Started 
+ Container cliente Started 
+ Container etcd2 Started 
+ Container app2 Starting 
+ Container app1 Starting 
+ Container app3 Starting 
+ Container app2 Started 
+ Container app1 Started 
+ Container app3 Started 
+ Container etcd3 Waiting 
+ Container app2 Waiting 
+ Container etcd1 Waiting 
+ Container app1 Waiting 
+ Container app3 Waiting 
+ Container cliente Waiting 
+ Container etcd2 Waiting 
+ Container app1 Healthy 
+ Container app3 Healthy 
+ Container app2 Healthy 
+ Container cliente Healthy 
+ Container etcd1 Healthy 
+ Container etcd3 Healthy 
+ Container etcd2 Healthy 

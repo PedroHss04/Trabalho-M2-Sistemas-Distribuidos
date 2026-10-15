@@ -66,6 +66,9 @@ def main():
           f"(intervalo nominal {INTERVALO * 1000:.0f} ms)")
     for r in falhas[:5]:
         print(f"  falha às {time.strftime('%H:%M:%S', time.localtime(r[0]))}: {r[4]}")
+    # linha legível por máquina (consumida por scripts/e9_repeticoes.sh)
+    print(f"RESUMO;{len(regs)};{len(oks)};{len(falhas)};{maior_gap:.0f};"
+          f"{statistics.mean(oks) if oks else 0:.1f};{max(oks) if oks else 0:.1f}")
 
     os.makedirs(SAIDA, exist_ok=True)
     arq = os.path.join(SAIDA, f"escritor_{time.strftime('%Y%m%d_%H%M%S')}.csv")

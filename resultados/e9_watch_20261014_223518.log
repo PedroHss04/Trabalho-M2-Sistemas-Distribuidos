@@ -1,0 +1,91 @@
+# e9_watch — 2026-10-14 22:35:18 — log em resultados/e9_watch_20261014_223518.log
+
+=================== 1. Propagação put -> apps aplicaram (20 repetições) ===================
+
+Resumo (atraso put -> app aplicou):
+app      n  média ms  desvio ms     mín     máx
+app1    20      7.53       2.79    4.02   14.66
+app2    20      7.56       2.79    4.04   14.69
+app3    20      7.53       2.83    3.96   14.82
+
+CSV salvo em /resultados/watch_20261015_013530.csv
+
+=================== 2. Queda do membro que serve o watch das apps ===================
+as apps estão com o watch aberto em 172.31.0.31 (etcd1); derrubando etcd1 às 22:35:30
+3 puts feitos via etcd2; aguardando as apps (detecção pelo fim da conexão / progress notify)...
+01:35:25 [app1] rev=54 APLICADA /config/modo = {"valor": "teste-12", "ts": 1792028125.3589861}  (atraso 9.8 ms)
+01:35:25 [app1] rev=58 APLICADA /config/modo = {"valor": "teste-13", "ts": 1792028125.895893}  (atraso 6.9 ms)
+01:35:25 [app2] rev=54 APLICADA /config/modo = {"valor": "teste-12", "ts": 1792028125.3589861}  (atraso 9.8 ms)
+01:35:25 [app2] rev=58 APLICADA /config/modo = {"valor": "teste-13", "ts": 1792028125.895893}  (atraso 6.8 ms)
+01:35:25 [app3] rev=54 APLICADA /config/modo = {"valor": "teste-12", "ts": 1792028125.3589861}  (atraso 9.8 ms)
+01:35:25 [app3] rev=58 APLICADA /config/modo = {"valor": "teste-13", "ts": 1792028125.895893}  (atraso 6.8 ms)
+01:35:26 [app1] rev=62 APLICADA /config/modo = {"valor": "teste-14", "ts": 1792028126.433016}  (atraso 5.4 ms)
+01:35:26 [app2] rev=62 APLICADA /config/modo = {"valor": "teste-14", "ts": 1792028126.433016}  (atraso 5.5 ms)
+01:35:26 [app3] rev=62 APLICADA /config/modo = {"valor": "teste-14", "ts": 1792028126.433016}  (atraso 5.4 ms)
+01:35:27 [app1] rev=66 APLICADA /config/modo = {"valor": "teste-15", "ts": 1792028126.996457}  (atraso 9.9 ms)
+01:35:27 [app1] rev=70 APLICADA /config/modo = {"valor": "teste-16", "ts": 1792028127.553077}  (atraso 4.8 ms)
+01:35:27 [app2] rev=66 APLICADA /config/modo = {"valor": "teste-15", "ts": 1792028126.996457}  (atraso 10.0 ms)
+01:35:27 [app2] rev=70 APLICADA /config/modo = {"valor": "teste-16", "ts": 1792028127.553077}  (atraso 5.0 ms)
+01:35:27 [app3] rev=66 APLICADA /config/modo = {"valor": "teste-15", "ts": 1792028126.996457}  (atraso 10.1 ms)
+01:35:27 [app3] rev=70 APLICADA /config/modo = {"valor": "teste-16", "ts": 1792028127.553077}  (atraso 4.8 ms)
+01:35:28 [app1] rev=74 APLICADA /config/modo = {"valor": "teste-17", "ts": 1792028128.1127925}  (atraso 4.0 ms)
+01:35:28 [app1] rev=78 APLICADA /config/modo = {"valor": "teste-18", "ts": 1792028128.6659095}  (atraso 4.4 ms)
+01:35:28 [app2] rev=74 APLICADA /config/modo = {"valor": "teste-17", "ts": 1792028128.1127925}  (atraso 4.0 ms)
+01:35:28 [app2] rev=78 APLICADA /config/modo = {"valor": "teste-18", "ts": 1792028128.6659095}  (atraso 4.4 ms)
+01:35:28 [app3] rev=74 APLICADA /config/modo = {"valor": "teste-17", "ts": 1792028128.1127925}  (atraso 4.0 ms)
+01:35:28 [app3] rev=78 APLICADA /config/modo = {"valor": "teste-18", "ts": 1792028128.6659095}  (atraso 4.4 ms)
+01:35:29 [app1] rev=82 APLICADA /config/modo = {"valor": "teste-19", "ts": 1792028129.2196326}  (atraso 6.9 ms)
+01:35:29 [app1] rev=86 APLICADA /config/modo = {"valor": "teste-20", "ts": 1792028129.7801478}  (atraso 5.9 ms)
+01:35:29 [app2] rev=82 APLICADA /config/modo = {"valor": "teste-19", "ts": 1792028129.2196326}  (atraso 7.0 ms)
+01:35:29 [app2] rev=86 APLICADA /config/modo = {"valor": "teste-20", "ts": 1792028129.7801478}  (atraso 5.9 ms)
+01:35:29 [app3] rev=82 APLICADA /config/modo = {"valor": "teste-19", "ts": 1792028129.2196326}  (atraso 6.9 ms)
+01:35:29 [app3] rev=86 APLICADA /config/modo = {"valor": "teste-20", "ts": 1792028129.7801478}  (atraso 5.9 ms)
+01:35:30 [app1] watch caiu em http://172.31.0.31:2379 (conexão encerrada pelo servidor); reconectando e retomando da revisão 87
+01:35:30 [app2] watch caiu em http://172.31.0.31:2379 (conexão encerrada pelo servidor); reconectando e retomando da revisão 87
+01:35:30 [app3] watch caiu em http://172.31.0.31:2379 (conexão encerrada pelo servidor); reconectando e retomando da revisão 87
+01:35:31 [app1] watch aberto em http://172.31.0.32:2379 a partir da revisão 87
+01:35:31 [app2] watch aberto em http://172.31.0.32:2379 a partir da revisão 87
+01:35:31 [app3] watch aberto em http://172.31.0.32:2379 a partir da revisão 87
+01:35:32 [app1] rev=90 APLICADA /config/modo = durante-a-queda-a
+01:35:32 [app1] rev=94 APLICADA /config/modo = durante-a-queda-b
+01:35:32 [app1] rev=98 APLICADA /config/modo = durante-a-queda-c
+01:35:32 [app2] rev=90 APLICADA /config/modo = durante-a-queda-a
+01:35:32 [app2] rev=94 APLICADA /config/modo = durante-a-queda-b
+01:35:32 [app2] rev=98 APLICADA /config/modo = durante-a-queda-c
+01:35:32 [app3] rev=90 APLICADA /config/modo = durante-a-queda-a
+01:35:32 [app3] rev=94 APLICADA /config/modo = durante-a-queda-b
+01:35:32 [app3] rev=98 APLICADA /config/modo = durante-a-queda-c
+
+=================== 3. Compactação com o app1 desconectado da rede de clientes ===================
+22:35:42 app1 desconectado; 5 mudanças de configuração e compactação do histórico
+compacted revision 117
+22:35:43 mantendo o app1 fora por 20 s (mais que o timeout de leitura do watch, 15 s)
+22:36:03 app1 reconectado; aguardando o watch dele reabrir
+01:35:25 [app1] rev=54 APLICADA /config/modo = {"valor": "teste-12", "ts": 1792028125.3589861}  (atraso 9.8 ms)
+01:35:25 [app1] rev=58 APLICADA /config/modo = {"valor": "teste-13", "ts": 1792028125.895893}  (atraso 6.9 ms)
+01:35:26 [app1] rev=62 APLICADA /config/modo = {"valor": "teste-14", "ts": 1792028126.433016}  (atraso 5.4 ms)
+01:35:27 [app1] rev=66 APLICADA /config/modo = {"valor": "teste-15", "ts": 1792028126.996457}  (atraso 9.9 ms)
+01:35:27 [app1] rev=70 APLICADA /config/modo = {"valor": "teste-16", "ts": 1792028127.553077}  (atraso 4.8 ms)
+01:35:28 [app1] rev=74 APLICADA /config/modo = {"valor": "teste-17", "ts": 1792028128.1127925}  (atraso 4.0 ms)
+01:35:28 [app1] rev=78 APLICADA /config/modo = {"valor": "teste-18", "ts": 1792028128.6659095}  (atraso 4.4 ms)
+01:35:29 [app1] rev=82 APLICADA /config/modo = {"valor": "teste-19", "ts": 1792028129.2196326}  (atraso 6.9 ms)
+01:35:29 [app1] rev=86 APLICADA /config/modo = {"valor": "teste-20", "ts": 1792028129.7801478}  (atraso 5.9 ms)
+01:35:30 [app1] watch caiu em http://172.31.0.31:2379 (conexão encerrada pelo servidor); reconectando e retomando da revisão 87
+01:35:31 [app1] watch aberto em http://172.31.0.32:2379 a partir da revisão 87
+01:35:32 [app1] rev=90 APLICADA /config/modo = durante-a-queda-a
+01:35:32 [app1] rev=94 APLICADA /config/modo = durante-a-queda-b
+01:35:32 [app1] rev=98 APLICADA /config/modo = durante-a-queda-c
+01:35:56 [app1] watch caiu em http://172.31.0.32:2379 (timed out); reconectando e retomando da revisão 102
+01:35:57 [app1] watch caiu em http://172.31.0.33:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:35:57 [app1] watch caiu em http://172.31.0.34:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:35:58 [app1] watch caiu em http://172.31.0.31:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:35:58 [app1] watch caiu em http://172.31.0.32:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:35:59 [app1] watch caiu em http://172.31.0.33:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:36:00 [app1] watch caiu em http://172.31.0.34:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:36:01 [app1] watch caiu em http://172.31.0.31:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:36:02 [app1] watch caiu em http://172.31.0.32:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:36:04 [app1] watch aberto em http://172.31.0.33:2379 a partir da revisão 102
+01:36:04 [app1] watch cancelado (revisão compactada até 117); estado relido na revisão 119: {'/config/log_level': 'info', '/config/modo': 'pos-compactacao', '/config/versao': '5'}
+01:36:04 [app1] watch aberto em http://172.31.0.33:2379 a partir da revisão 120
+
+>> app2/app3 (sempre conectados) receberam cada evento; o app1 recebeu o estado final relido.

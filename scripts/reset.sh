@@ -1,16 +1,12 @@
 #!/usr/bin/env bash
 # Recria o laboratório do zero (3 membros, sem etcd4) e grava a configuração inicial.
 # Use antes de cada repetição do e9_reconfig.sh.
-set -euo pipefail
-cd "$(dirname "$0")/.."
+#   SNAPSHOT_COUNT=1000 ./scripts/reset.sh   -> snapshots frequentes (E7 parte 2)
+. "$(dirname "$0")/lib.sh"
 docker compose --profile extra down --remove-orphans
-docker compose up -d
-echo "aguardando o cluster ficar saudável..."
-for i in $(seq 1 60); do
-  if docker exec etcd1 etcdctl --endpoints=http://172.31.0.31:2379,http://172.31.0.32:2379,http://172.31.0.33:2379 \
-       endpoint health >/dev/null 2>&1; then break; fi
-  sleep 1
-done
-docker exec etcd1 etcdctl put /config/modo '{"valor": "producao"}' >/dev/null
-docker exec etcd1 etcdctl put /config/log_level info >/dev/null
+# --wait: só retorna quando os 3 membros passam no healthcheck (endpoint health, exige quórum)
+docker compose up -d --wait
+sonda esperar-saudavel 60
+ctl etcd1 put /config/modo '{"valor": "producao"}' >/dev/null
+ctl etcd1 put /config/log_level info >/dev/null
 ./scripts/status.sh

@@ -5,11 +5,22 @@
 #   docker compose --profile extra up -d etcd4 -> só DEPOIS do "member add --learner" (ver scripts/e9_reconfig.sh)
 #
 # Redes: "interna" = tráfego Raft entre pares (2380); "clientes" = API de clientes (2379).
+#
+# Variável opcional: SNAPSHOT_COUNT (padrão 100000). O E7 parte 2 usa SNAPSHOT_COUNT=1000.
+
+# nome fixo do projeto: as redes ficam t5-etcd-enfasec_interna / _clientes em qualquer pasta
+name: t5-etcd-enfasec
 
 x-etcd: &etcd
   image: quay.io/coreos/etcd:v3.5.17
   mem_limit: 256m
   restart: "no"
+  # a imagem não tem shell; o etcdctl roda direto (exec form). "health" exige quórum.
+  healthcheck:
+    test: ["CMD", "etcdctl", "--endpoints=http://127.0.0.1:2379", "endpoint", "health"]
+    interval: 2s
+    timeout: 3s
+    retries: 30
 
 x-etcd-flags: &etcd-flags
   ETCD_DATA_DIR: /etcd-data
@@ -20,6 +31,8 @@ x-etcd-flags: &etcd-flags
   ETCD_INITIAL_CLUSTER_STATE: new
   # envia "progress notify" aos watches a cada 5 s: o app percebe conexão morta rápido
   ETCD_EXPERIMENTAL_WATCH_PROGRESS_NOTIFY_INTERVAL: 5s
+  # snapshot do estado a cada N entradas aplicadas (E7 parte 2 usa 1000)
+  ETCD_SNAPSHOT_COUNT: ${SNAPSHOT_COUNT:-100000}
   ETCDCTL_API: "3"
 
 x-app: &app

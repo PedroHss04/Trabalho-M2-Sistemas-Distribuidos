@@ -1,0 +1,38 @@
+# e5_falha — 2026-10-14 22:12:40 — log em resultados/e5_falha_20261014_221240.log
+
+=================== 1a. docker kill no líder (queda abrupta): os outros esperam o election timeout ===================
+  [kill #1] {"lider_antigo": "etcd1", "termo_antigo": 2, "lider_novo": "etcd3", "termo_novo": 3, "visto_por": "etcd2", "sem_lider_ms": 1370.2}
+  [kill #2] {"lider_antigo": "etcd3", "termo_antigo": 3, "lider_novo": "etcd2", "termo_novo": 4, "visto_por": "etcd1", "sem_lider_ms": 1111.2}
+  [kill #3] {"lider_antigo": "etcd2", "termo_antigo": 4, "lider_novo": "etcd1", "termo_novo": 5, "visto_por": "etcd1", "sem_lider_ms": 996.0}
+  [kill #4] {"lider_antigo": "etcd1", "termo_antigo": 5, "lider_novo": "etcd2", "termo_novo": 6, "visto_por": "etcd2", "sem_lider_ms": 1052.3}
+  [kill #5] {"lider_antigo": "etcd2", "termo_antigo": 6, "lider_novo": "etcd1", "termo_novo": 7, "visto_por": "etcd1", "sem_lider_ms": 1311.5}
+
+=================== 1b. docker stop no líder (SIGTERM): o etcd transfere a liderança antes de sair ===================
+  [stop #1] {"lider_antigo": "etcd1", "termo_antigo": 7, "lider_novo": "etcd3", "termo_novo": 8, "visto_por": "etcd2", "sem_lider_ms": 23.3}
+  [stop #2] {"lider_antigo": "etcd3", "termo_antigo": 8, "lider_novo": "etcd2", "termo_novo": 9, "visto_por": "etcd1", "sem_lider_ms": 12.6}
+  [stop #3] {"lider_antigo": "etcd2", "termo_antigo": 9, "lider_novo": "etcd1", "termo_novo": 10, "visto_por": "etcd1", "sem_lider_ms": 10.7}
+  [stop #4] {"lider_antigo": "etcd1", "termo_antigo": 10, "lider_novo": "etcd3", "termo_novo": 11, "visto_por": "etcd2", "sem_lider_ms": 13.6}
+  [stop #5] {"lider_antigo": "etcd3", "termo_antigo": 11, "lider_novo": "etcd2", "termo_novo": 12, "visto_por": "etcd1", "sem_lider_ms": 17.7}
+
+=================== Resumo da janela sem líder (ms) ===================
+kill  n=5  média=1168.240  desvio=164.068  mín=996.000  máx=1370.200
+stop  n=5  média=15.580  desvio=5.018  mín=10.700  máx=23.300
+termos ao longo das falhas: 2,3 3,4 4,5 5,6 6,7 7,8 8,9 9,10 10,11 11,12 
+
+=================== 2. Quadro membros ativos x operações (endpoint único do sobrevivente, timeout 3 s) ===================
+| membros ativos               | escrita    | leit. lin. | leit. ser. |
+|------------------------------|------------|------------|------------|
+| 3 de 3 (etcd1 etcd2 etcd3)   | OK         | OK         | OK         |
+| 2 de 3 (parado: etcd1)       | OK         | OK         | OK         |
+| 1 de 3 (parados: etcd1, etcd3) | FALHA (Err | FALHA (Err | OK         |
+
+>> mensagens completas no estado sem maioria (consultando etcd2):
+put:          Error: context deadline exceeded
+get lin.:     Error: context deadline exceeded
+get serial.:  v
+>> status do sobrevivente (sem quórum ele deixa de ser líder):
++-----------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+-----------------------+
+|       ENDPOINT        |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX |        ERRORS         |
++-----------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+-----------------------+
+| http://127.0.0.1:2379 | 729febf16625624c |  3.5.17 |   22 MB |     false |      false |        12 |       9757 |               9757 | etcdserver: no leader |
++-----------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+-----------------------+

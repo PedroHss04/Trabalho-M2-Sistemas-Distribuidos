@@ -1,0 +1,57 @@
+# e6_particao — 2026-10-14 22:15:16 — log em resultados/e6_particao_20261014_221516.log
+líder atual: etcd2 (será isolado)   membro do lado majoritário usado nas consultas: etcd1
+
+=================== Antes da partição ===================
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+|        ENDPOINT         |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+| http://172.31.0.31:2379 | f7c63021767e3289 |  3.5.17 |   22 MB |     false |      false |        13 |       9876 |               9876 |        |
+| http://172.31.0.32:2379 | 729febf16625624c |  3.5.17 |   22 MB |      true |      false |        13 |       9876 |               9876 |        |
+| http://172.31.0.33:2379 | a740cd75718ef0d5 |  3.5.17 |   22 MB |     false |      false |        13 |       9876 |               9876 |        |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+
+=================== Desconectando etcd2 da rede interna ===================
+22:15:18.183 docker network disconnect t5-etcd-enfasec_interna etcd2
+22:15:19.585 sonda: {"lider_antigo": "etcd2", "termo_antigo": 13, "lider_novo": "etcd1", "termo_novo": 14, "visto_por": "etcd1", "sem_lider_ms": 0.3, "desde_pronto_s": 1.143}
+
+=================== Logo após a eleição: as duas visões (o isolado pode ainda se achar líder por um instante) ===================
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+|        ENDPOINT         |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+| http://172.31.0.31:2379 | f7c63021767e3289 |  3.5.17 |   22 MB |      true |      false |        14 |       9880 |               9880 |        |
+| http://172.31.0.32:2379 | 729febf16625624c |  3.5.17 |   22 MB |      true |      false |        13 |       9878 |               9878 |        |
+| http://172.31.0.33:2379 | a740cd75718ef0d5 |  3.5.17 |   22 MB |     false |      false |        14 |       9880 |               9880 |        |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+
+=================== 3 s depois (check quorum: o líder isolado percebe que perdeu a maioria e renuncia) ===================
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+-----------------------+
+|        ENDPOINT         |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX |        ERRORS         |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+-----------------------+
+| http://172.31.0.31:2379 | f7c63021767e3289 |  3.5.17 |   22 MB |      true |      false |        14 |       9883 |               9883 |                       |
+| http://172.31.0.32:2379 | 729febf16625624c |  3.5.17 |   22 MB |     false |      false |        13 |       9878 |               9878 | etcdserver: no leader |
+| http://172.31.0.33:2379 | a740cd75718ef0d5 |  3.5.17 |   22 MB |     false |      false |        14 |       9883 |               9883 |                       |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+-----------------------+
+
+=================== Lado MAJORITÁRIO (etcd1 e o outro membro) ===================
+22:15:23.021 put /e6/valor=DEPOIS (via etcd1): OK
+22:15:23.293 get linearizável em etcd1:   DEPOIS-DA-PARTICAO
+
+=================== Lado MINORITÁRIO: cliente conectado só a etcd2 ===================
+22:15:23.523 put em etcd2:                 Error: context deadline exceeded
+22:15:26.730 get linearizável em etcd2:   Error: context deadline exceeded
+22:15:29.948 get serializável em etcd2:   ANTES-DA-PARTICAO
+
+>> Conclusão: o lado minoritário recusa escritas e leituras linearizáveis (sacrifica
+   disponibilidade para não violar a consistência) => CP. Só a leitura serializável,
+   que o cliente pede explicitamente abrindo mão da garantia, devolve o valor antigo.
+
+=================== Reconectando etcd2 (recuperação: ver E7) ===================
+{"membro": "etcd2", "lider": "etcd1", "termo": 14, "aplicado_membro": 9895, "aplicado_lider": 9895, "reingresso_s": 1.914, "sincronizou_apos_reingresso_ms": 0.0, "total_desde_pronto_s": 1.914}
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+|        ENDPOINT         |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+| http://172.31.0.31:2379 | f7c63021767e3289 |  3.5.17 |   22 MB |      true |      false |        14 |       9895 |               9895 |        |
+| http://172.31.0.32:2379 | 729febf16625624c |  3.5.17 |   22 MB |     false |      false |        14 |       9895 |               9895 |        |
+| http://172.31.0.33:2379 | a740cd75718ef0d5 |  3.5.17 |   22 MB |     false |      false |        14 |       9895 |               9895 |        |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+22:15:32.923 get linearizável em etcd2: DEPOIS-DA-PARTICAO
