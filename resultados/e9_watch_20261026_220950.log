@@ -1,0 +1,112 @@
+# e9_watch — 2026-10-26 22:09:50 — log em resultados/e9_watch_20261026_220950.log
+
+=================== 1. Propagação put -> apps aplicaram (20 repetições) ===================
+
+Resumo (atraso put -> app aplicou):
+app      n  média ms  desvio ms     mín     máx
+app1    20     18.93      12.25    5.47   48.26
+app2    20     18.37      12.19    5.02   47.84
+app3    20     18.67      12.43    5.20   48.03
+
+CSV salvo em /resultados/watch_20261027_011002.csv
+
+=================== 2. Queda do membro que serve o watch das apps ===================
+as apps estão com o watch aberto em http://172.31.0.31:2379 (etcd1); derrubando etcd1 às 22:10:03
+3 puts feitos via etcd2; aguardando as apps (detecção pelo fim da conexão / progress notify)...
+01:09:59 [app1] rev=70 APLICADA /config/modo = {"valor": "teste-16", "ts": 1793063399.3344045}  (atraso 19.0 ms)
+01:09:59 [app1] rev=74 APLICADA /config/modo = {"valor": "teste-17", "ts": 1793063399.9110367}  (atraso 8.6 ms)
+01:09:59 [app2] rev=70 APLICADA /config/modo = {"valor": "teste-16", "ts": 1793063399.3344045}  (atraso 17.5 ms)
+01:09:59 [app2] rev=74 APLICADA /config/modo = {"valor": "teste-17", "ts": 1793063399.9110367}  (atraso 10.3 ms)
+01:09:59 [app3] rev=70 APLICADA /config/modo = {"valor": "teste-16", "ts": 1793063399.3344045}  (atraso 19.1 ms)
+01:09:59 [app3] rev=74 APLICADA /config/modo = {"valor": "teste-17", "ts": 1793063399.9110367}  (atraso 8.7 ms)
+01:10:00 [app1] rev=78 APLICADA /config/modo = {"valor": "teste-18", "ts": 1793063400.482225}  (atraso 33.5 ms)
+01:10:00 [app2] rev=78 APLICADA /config/modo = {"valor": "teste-18", "ts": 1793063400.482225}  (atraso 32.3 ms)
+01:10:00 [app3] rev=78 APLICADA /config/modo = {"valor": "teste-18", "ts": 1793063400.482225}  (atraso 33.3 ms)
+01:10:01 [app1] rev=82 APLICADA /config/modo = {"valor": "teste-19", "ts": 1793063401.0901837}  (atraso 27.2 ms)
+01:10:01 [app1] rev=86 APLICADA /config/modo = {"valor": "teste-20", "ts": 1793063401.6758816}  (atraso 5.5 ms)
+01:10:01 [app2] rev=82 APLICADA /config/modo = {"valor": "teste-19", "ts": 1793063401.0901837}  (atraso 27.2 ms)
+01:10:01 [app2] rev=86 APLICADA /config/modo = {"valor": "teste-20", "ts": 1793063401.6758816}  (atraso 5.5 ms)
+01:10:01 [app3] rev=82 APLICADA /config/modo = {"valor": "teste-19", "ts": 1793063401.0901837}  (atraso 27.0 ms)
+01:10:01 [app3] rev=86 APLICADA /config/modo = {"valor": "teste-20", "ts": 1793063401.6758816}  (atraso 6.4 ms)
+01:10:03 [app1] watch aberto em http://172.31.0.32:2379 a partir da revisão 87
+01:10:03 [app1] watch caiu em http://172.31.0.31:2379 (error reading from server: EOF); reconectando e retomando da revisão 87
+01:10:03 [app2] watch aberto em http://172.31.0.32:2379 a partir da revisão 87
+01:10:03 [app2] watch caiu em http://172.31.0.31:2379 (error reading from server: EOF); reconectando e retomando da revisão 87
+01:10:03 [app3] watch aberto em http://172.31.0.32:2379 a partir da revisão 87
+01:10:03 [app3] watch caiu em http://172.31.0.31:2379 (error reading from server: EOF); reconectando e retomando da revisão 87
+01:10:05 [app1] rev=90 APLICADA /config/modo = durante-a-queda-a
+01:10:05 [app1] rev=94 APLICADA /config/modo = durante-a-queda-b
+01:10:05 [app2] rev=90 APLICADA /config/modo = durante-a-queda-a
+01:10:05 [app2] rev=94 APLICADA /config/modo = durante-a-queda-b
+01:10:05 [app3] rev=90 APLICADA /config/modo = durante-a-queda-a
+01:10:05 [app3] rev=94 APLICADA /config/modo = durante-a-queda-b
+01:10:06 [app1] rev=98 APLICADA /config/modo = durante-a-queda-c
+01:10:06 [app2] rev=98 APLICADA /config/modo = durante-a-queda-c
+01:10:06 [app3] rev=98 APLICADA /config/modo = durante-a-queda-c
+
+=================== 3. Compactação com o app1 desconectado da rede de clientes ===================
+22:10:16 app1 desconectado; 5 mudanças de configuração e compactação do histórico
+compacted revision 117
+22:10:20 mantendo o app1 fora por 20 s (mais que o timeout de leitura do watch, 15 s)
+22:10:40 app1 reconectado; aguardando o watch dele reabrir
+01:10:03 [app1] watch caiu em http://172.31.0.31:2379 (error reading from server: EOF); reconectando e retomando da revisão 87
+01:10:03 [app1] watch aberto em http://172.31.0.32:2379 a partir da revisão 87
+01:10:05 [app1] rev=90 APLICADA /config/modo = durante-a-queda-a
+01:10:05 [app1] rev=94 APLICADA /config/modo = durante-a-queda-b
+01:10:06 [app1] rev=98 APLICADA /config/modo = durante-a-queda-c
+01:10:29 [app1] watch caiu em http://172.31.0.32:2379 (timed out); reconectando e retomando da revisão 102
+01:10:29 [app1] watch caiu em http://172.31.0.33:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:10:30 [app1] watch caiu em http://172.31.0.34:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:10:30 [app1] watch caiu em http://172.31.0.31:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:10:31 [app1] watch caiu em http://172.31.0.32:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:10:32 [app1] watch caiu em http://172.31.0.33:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:10:33 [app1] watch caiu em http://172.31.0.34:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:10:34 [app1] watch caiu em http://172.31.0.31:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:10:35 [app1] watch caiu em http://172.31.0.32:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:10:37 [app1] watch caiu em http://172.31.0.33:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:10:39 [app1] watch caiu em http://172.31.0.34:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:10:41 [app1] watch aberto em http://172.31.0.31:2379 a partir da revisão 102
+01:10:41 [app1] watch cancelado (revisão compactada até 117); estado relido na revisão 119: {'/config/log_level': 'info', '/config/modo': 'pos-compactacao', '/config/versao': '5'}
+01:10:41 [app1] watch aberto em http://172.31.0.31:2379 a partir da revisão 120
+
+>> app2/app3 (sempre conectados) receberam cada evento; o app1 recebeu o estado final relido.
+
+=================== 4. Partição: membro que serve o watch das apps isolado da rede interna ===================
+22:10:44 watch das apps: app1 em etcd1, app2 em etcd2, app3 em etcd2
+22:10:46 isolando etcd1 (era líder: nao) da rede interna
+22:10:49 put /config/modo=durante-a-particao pela maioria (via etcd2); aguardando as apps (até 30 s)
+app1: OK (aplicou em 3.476 s)
+app2: OK (aplicou em 1.127 s)
+app3: OK (aplicou em 1.769 s)
+01:10:17 [app2] rev=102 APLICADA /config/versao = 1
+01:10:17 [app2] rev=105 APLICADA /config/versao = 2
+01:10:17 [app3] rev=102 APLICADA /config/versao = 1
+01:10:17 [app3] rev=105 APLICADA /config/versao = 2
+01:10:18 [app2] rev=108 APLICADA /config/versao = 3
+01:10:18 [app2] rev=111 APLICADA /config/versao = 4
+01:10:18 [app3] rev=108 APLICADA /config/versao = 3
+01:10:18 [app3] rev=111 APLICADA /config/versao = 4
+01:10:19 [app2] rev=114 APLICADA /config/versao = 5
+01:10:19 [app2] rev=117 APLICADA /config/modo = pos-compactacao
+01:10:19 [app3] rev=114 APLICADA /config/versao = 5
+01:10:19 [app3] rev=117 APLICADA /config/modo = pos-compactacao
+01:10:29 [app1] watch caiu em http://172.31.0.32:2379 (timed out); reconectando e retomando da revisão 102
+01:10:29 [app1] watch caiu em http://172.31.0.33:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:10:30 [app1] watch caiu em http://172.31.0.31:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:10:30 [app1] watch caiu em http://172.31.0.34:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:10:31 [app1] watch caiu em http://172.31.0.32:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:10:32 [app1] watch caiu em http://172.31.0.33:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:10:33 [app1] watch caiu em http://172.31.0.34:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:10:34 [app1] watch caiu em http://172.31.0.31:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:10:35 [app1] watch caiu em http://172.31.0.32:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:10:37 [app1] watch caiu em http://172.31.0.33:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:10:39 [app1] watch caiu em http://172.31.0.34:2379 (<urlopen error [Errno 101] Network unreachable>); reconectando e retomando da revisão 102
+01:10:41 [app1] watch aberto em http://172.31.0.31:2379 a partir da revisão 102
+01:10:41 [app1] watch aberto em http://172.31.0.31:2379 a partir da revisão 120
+01:10:41 [app1] watch cancelado (revisão compactada até 117); estado relido na revisão 119: {'/config/log_level': 'info', '/config/modo': 'pos-compactacao', '/config/versao': '5'}
+01:10:49 [app2] rev=120 APLICADA /config/modo = durante-a-particao
+01:10:49 [app3] rev=120 APLICADA /config/modo = durante-a-particao
+01:10:50 [app1] watch caiu em http://172.31.0.31:2379 (etcdserver: no leader); reconectando e retomando da revisão 120
+01:10:51 [app1] rev=120 APLICADA /config/modo = durante-a-particao
+01:10:51 [app1] watch aberto em http://172.31.0.32:2379 a partir da revisão 120
+saudável em 4.73 s: líder etcd3, 3 membros respondendo

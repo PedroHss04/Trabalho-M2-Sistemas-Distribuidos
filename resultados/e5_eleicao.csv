@@ -1,0 +1,11 @@
+modo,repeticao,lider_antigo,termo_antigo,lider_novo,termo_novo,sem_lider_ms
+kill,1,etcd1,2,etcd3,3,1370.2
+kill,2,etcd3,3,etcd2,4,1111.2
+kill,3,etcd2,4,etcd1,5,996.0
+kill,4,etcd1,5,etcd2,6,1052.3
+kill,5,etcd2,6,etcd1,7,1311.5
+stop,1,etcd1,7,etcd3,8,23.3
+stop,2,etcd3,8,etcd2,9,12.6
+stop,3,etcd2,9,etcd1,10,10.7
+stop,4,etcd1,10,etcd3,11,13.6
+stop,5,etcd3,11,etcd2,12,17.7

@@ -1,0 +1,96 @@
+# reconfig — 2026-10-14 23:00:13 — log em resultados/reconfig_20261014_230013.log
+
+=================== 0. Estado inicial (remover no fim: etcd2; líder atual: etcd2) ===================
++------------------+---------+-------+-------------------------+-------------------------+------------+
+|        ID        | STATUS  | NAME  |       PEER ADDRS        |      CLIENT ADDRS       | IS LEARNER |
++------------------+---------+-------+-------------------------+-------------------------+------------+
+| 729febf16625624c | started | etcd2 | http://172.30.0.32:2380 | http://172.31.0.32:2379 |      false |
+| a740cd75718ef0d5 | started | etcd3 | http://172.30.0.33:2380 | http://172.31.0.33:2379 |      false |
+| f7c63021767e3289 | started | etcd1 | http://172.30.0.31:2380 | http://172.31.0.31:2379 |      false |
++------------------+---------+-------+-------------------------+-------------------------+------------+
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+|        ENDPOINT         |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+| http://172.31.0.32:2379 | 729febf16625624c |  3.5.17 |  7.0 MB |      true |      false |         2 |       5133 |               5133 |        |
+| http://172.31.0.33:2379 | a740cd75718ef0d5 |  3.5.17 |  7.0 MB |     false |      false |         2 |       5133 |               5133 |        |
+| http://172.31.0.31:2379 | f7c63021767e3289 |  3.5.17 |  7.0 MB |     false |      false |         2 |       5133 |               5133 |        |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+
+=================== 1. member add etcd4 --learner ===================
+Member 8321bf8e185061d2 added to cluster 5e0853986a79aafd
+
+ETCD_NAME="etcd4"
+ETCD_INITIAL_CLUSTER="etcd2=http://172.30.0.32:2380,etcd4=http://172.30.0.34:2380,etcd3=http://172.30.0.33:2380,etcd1=http://172.30.0.31:2380"
+ETCD_INITIAL_ADVERTISE_PEER_URLS="http://172.30.0.34:2380"
+ETCD_INITIAL_CLUSTER_STATE="existing"
+>> learner registrado em 0.245 s. Votantes continuam 3 => quórum = 2.
++------------------+-----------+-------+-------------------------+-------------------------+------------+
+|        ID        |  STATUS   | NAME  |       PEER ADDRS        |      CLIENT ADDRS       | IS LEARNER |
++------------------+-----------+-------+-------------------------+-------------------------+------------+
+| 729febf16625624c |   started | etcd2 | http://172.30.0.32:2380 | http://172.31.0.32:2379 |      false |
+| 8321bf8e185061d2 | unstarted |       | http://172.30.0.34:2380 |                         |       true |
+| a740cd75718ef0d5 |   started | etcd3 | http://172.30.0.33:2380 | http://172.31.0.33:2379 |      false |
+| f7c63021767e3289 |   started | etcd1 | http://172.30.0.31:2380 | http://172.31.0.31:2379 |      false |
++------------------+-----------+-------+-------------------------+-------------------------+------------+
+
+=================== 2. Subindo o etcd4 e medindo o catch-up (learner alcançando o líder) ===================
+>> sonda: {"membro": "etcd4", "lider": "etcd2", "termo": 2, "aplicado_membro": 5174, "aplicado_lider": 5174, "reingresso_s": 0.961, "sincronizou_apos_reingresso_ms": 0.0, "total_desde_pronto_s": 0.961}
+>> linha do tempo do etcd4 (carimbos do log do etcd):
+   +      0 ms  starting an etcd server
+   +    131 ms  published local member to cluster through raft
+   +    131 ms  ready to serve client requests
+>> subida (comando até o learner responder no termo atual): 0.961 s; boot + catch-up interno: 131 ms
+>> O learner NÃO atende leitura linearizável (esperado: 'rpc not supported for learner'):
+Error: etcdserver: rpc not supported for learner
+>> ...mas atende leitura serializável (dado local):
+{"valor": "producao"}
+
+=================== 3. member promote etcd4 (learner -> votante) ===================
+Member 8321bf8e185061d2 promoted in cluster 5e0853986a79aafd
+>> promovido em 0.258 s. Agora 4 votantes => quórum = 3 (tolera só 1 falha, igual a 3 membros!)
++------------------+---------+-------+-------------------------+-------------------------+------------+
+|        ID        | STATUS  | NAME  |       PEER ADDRS        |      CLIENT ADDRS       | IS LEARNER |
++------------------+---------+-------+-------------------------+-------------------------+------------+
+| 729febf16625624c | started | etcd2 | http://172.30.0.32:2380 | http://172.31.0.32:2379 |      false |
+| 8321bf8e185061d2 | started | etcd4 | http://172.30.0.34:2380 | http://172.31.0.34:2379 |      false |
+| a740cd75718ef0d5 | started | etcd3 | http://172.30.0.33:2380 | http://172.31.0.33:2379 |      false |
+| f7c63021767e3289 | started | etcd1 | http://172.30.0.31:2380 | http://172.31.0.31:2379 |      false |
++------------------+---------+-------+-------------------------+-------------------------+------------+
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+|        ENDPOINT         |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+| http://172.31.0.32:2379 | 729febf16625624c |  3.5.17 |  7.0 MB |      true |      false |         2 |       5258 |               5258 |        |
+| http://172.31.0.34:2379 | 8321bf8e185061d2 |  3.5.17 |  6.9 MB |     false |      false |         2 |       5258 |               5258 |        |
+| http://172.31.0.33:2379 | a740cd75718ef0d5 |  3.5.17 |  7.0 MB |     false |      false |         2 |       5258 |               5258 |        |
+| http://172.31.0.31:2379 | f7c63021767e3289 |  3.5.17 |  7.0 MB |     false |      false |         2 |       5258 |               5258 |        |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+
+=================== 4. member remove etcd2 ===================
+Leadership transferred from 729febf16625624c to 8321bf8e185061d2
+>> liderança transferida para etcd4 em 0.362 s; etcd2 agora é seguidor
+Member 729febf16625624c removed from cluster 5e0853986a79aafd
+>> removido em 0.275 s (era líder: sim) e contêiner parado. Voltamos a 3 votantes => quórum = 2.
+saudável em 0.30 s: líder etcd4, 3 membros respondendo
++------------------+---------+-------+-------------------------+-------------------------+------------+
+|        ID        | STATUS  | NAME  |       PEER ADDRS        |      CLIENT ADDRS       | IS LEARNER |
++------------------+---------+-------+-------------------------+-------------------------+------------+
+| 8321bf8e185061d2 | started | etcd4 | http://172.30.0.34:2380 | http://172.31.0.34:2379 |      false |
+| a740cd75718ef0d5 | started | etcd3 | http://172.30.0.33:2380 | http://172.31.0.33:2379 |      false |
+| f7c63021767e3289 | started | etcd1 | http://172.30.0.31:2380 | http://172.31.0.31:2379 |      false |
++------------------+---------+-------+-------------------------+-------------------------+------------+
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+|        ENDPOINT         |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+| http://172.31.0.34:2379 | 8321bf8e185061d2 |  3.5.17 |  6.9 MB |      true |      false |         3 |       5314 |               5314 |        |
+| http://172.31.0.33:2379 | a740cd75718ef0d5 |  3.5.17 |  7.0 MB |     false |      false |         3 |       5314 |               5314 |        |
+| http://172.31.0.31:2379 | f7c63021767e3289 |  3.5.17 |  7.0 MB |     false |      false |         3 |       5314 |               5314 |        |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+
+=================== Resumo ===================
+member add (learner) : 0.245 s
+subida do etcd4      : 0.961 s
+catch-up do learner  : 131 ms
+promote              : 0.258 s
+remove (etcd2)      : 0.275 s (era líder: sim; move-leader antes: 1)
+total                : 10.278 s
+log salvo em resultados/reconfig_20261014_230013.log

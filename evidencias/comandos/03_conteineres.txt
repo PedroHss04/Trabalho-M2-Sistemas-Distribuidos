@@ -1,0 +1,21 @@
+# Contêineres em execução, imagens usadas e tamanho
+# coletado em 2026-10-21 20:17:39 -0300
+
+$ docker compose ps --format 'table {{.Name}}\t{{.Image}}\t{{.Status}}'
+NAME      IMAGE                         STATUS
+app1      python:3.12-alpine            Up 5 seconds
+app2      python:3.12-alpine            Up 4 seconds
+app3      python:3.12-alpine            Up 4 seconds
+cliente   python:3.12-alpine            Up 5 seconds
+etcd1     quay.io/coreos/etcd:v3.5.17   Up 5 seconds (healthy)
+etcd2     quay.io/coreos/etcd:v3.5.17   Up 5 seconds (healthy)
+etcd3     quay.io/coreos/etcd:v3.5.17   Up 5 seconds (healthy)
+
+$ docker image ls --format 'table {{.Repository}}:{{.Tag}}\t{{.Size}}' quay.io/coreos/etcd:v3.5.17
+REPOSITORY:TAG                SIZE
+quay.io/coreos/etcd:v3.5.17   85.4MB
+
+$ docker image ls --format 'table {{.Repository}}:{{.Tag}}\t{{.Size}}' python:3.12-alpine
+REPOSITORY:TAG       SIZE
+python:3.12-alpine   83.6MB
+

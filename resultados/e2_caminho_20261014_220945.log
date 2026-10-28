@@ -1,0 +1,34 @@
+# e2_caminho — 2026-10-14 22:09:45 — log em resultados/e2_caminho_20261014_220945.log
+líder: etcd1   seguidor escolhido: etcd2
+
+=================== Antes: RAFT INDEX dos três membros ===================
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+|        ENDPOINT         |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+| http://172.31.0.31:2379 | f7c63021767e3289 |  3.5.17 |   20 kB |      true |      false |         2 |        188 |                188 |        |
+| http://172.31.0.32:2379 | 729febf16625624c |  3.5.17 |   20 kB |     false |      false |         2 |        188 |                188 |        |
+| http://172.31.0.33:2379 | a740cd75718ef0d5 |  3.5.17 |   20 kB |     false |      false |         2 |        188 |                188 |        |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+
+=================== put em etcd2 (endpoint único http://172.31.0.32:2379) com -w json ===================
+{"header":{"cluster_id":6775757553465404157,"member_id":8259579663654150732,"revision":10,"raft_term":2}}
+
+>> header.member_id = quem respondeu (etcd2); raft_term = termo do líder; revision = ordem global da escrita
+
+=================== Depois: o RAFT INDEX avançou nos três (a entrada foi replicada e aplicada em todos) ===================
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+|        ENDPOINT         |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+| http://172.31.0.31:2379 | f7c63021767e3289 |  3.5.17 |   20 kB |      true |      false |         2 |        194 |                194 |        |
+| http://172.31.0.32:2379 | 729febf16625624c |  3.5.17 |   20 kB |     false |      false |         2 |        194 |                194 |        |
+| http://172.31.0.33:2379 | a740cd75718ef0d5 |  3.5.17 |   20 kB |     false |      false |         2 |        194 |                194 |        |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+
+=================== Leitura linearizável no mesmo seguidor (ReadIndex: o seguidor confirma com o líder) ===================
+{"header":{"cluster_id":6775757553465404157,"member_id":8259579663654150732,"revision":13,"raft_term":2},"kvs":[{"key":"L2NvbmZpZy9tb2Rv","create_revision":2,"mod_revision":10,"version":2,"value":"cHJvZHVjYW8="}],"count":1}
+
+=================== Custo do salto extra: put direto no líder x via seguidor (100 de cada) ===================
+put com endpoint único (100 de cada, alternados); líder=etcd1, seguidor=etcd2
+  direto no líder etcd1 (ms): n=100  média=3.58  desvio=1.06  mín=2.56  máx=7.03
+  via seguidor etcd2 (ms): n=100  média=4.30  desvio=1.46  mín=2.78  máx=10.07
+CSV salvo em /resultados/e2_caminho_20261015_010948.csv

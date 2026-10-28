@@ -1,0 +1,110 @@
+# Subida do zero: docker compose down + up --wait (healthcheck) + configuração inicial
+# coletado em 2026-10-21 20:17:25 -0300
+
+$ ./scripts/reset.sh
+ Container app2 Stopping 
+ Container app1 Stopping 
+ Container app3 Stopping 
+ Container cliente Stopping 
+ Container app2 Stopped 
+ Container app2 Removing 
+ Container app2 Removed 
+ Container app1 Stopped 
+ Container app1 Removing 
+ Container app1 Removed 
+ Container app3 Stopped 
+ Container app3 Removing 
+ Container app3 Removed 
+ Container etcd3 Stopping 
+ Container etcd2 Stopping 
+ Container etcd1 Stopping 
+ Container cliente Stopped 
+ Container cliente Removing 
+ Container cliente Removed 
+ Container etcd2 Stopped 
+ Container etcd2 Removing 
+ Container etcd2 Removed 
+ Container etcd3 Stopped 
+ Container etcd3 Removing 
+ Container etcd3 Removed 
+ Container etcd1 Stopped 
+ Container etcd1 Removing 
+ Container etcd1 Removed 
+ Network t5-etcd-enfasec_interna Removing 
+ Network t5-etcd-enfasec_clientes Removing 
+ Network t5-etcd-enfasec_interna Removed 
+ Network t5-etcd-enfasec_clientes Removed 
+ Network t5-etcd-enfasec_interna Creating 
+ Network t5-etcd-enfasec_clientes Creating 
+ Network t5-etcd-enfasec_interna Creating 
+ Network t5-etcd-enfasec_clientes Creating 
+ Network t5-etcd-enfasec_clientes Created 
+ Network t5-etcd-enfasec_clientes Created 
+ Container cliente Creating 
+ Network t5-etcd-enfasec_interna Created 
+ Network t5-etcd-enfasec_interna Created 
+ Container etcd3 Creating 
+ Container etcd1 Creating 
+ Container etcd2 Creating 
+ Container cliente Created 
+ Container etcd1 Created 
+ Container etcd2 Created 
+ Container etcd3 Created 
+ Container app1 Creating 
+ Container app2 Creating 
+ Container app3 Creating 
+ Container app2 Created 
+ Container app3 Created 
+ Container app1 Created 
+ Container etcd2 Starting 
+ Container etcd3 Starting 
+ Container etcd1 Starting 
+ Container cliente Starting 
+ Container etcd2 Started 
+ Container etcd3 Started 
+ Container etcd1 Started 
+ Container app1 Starting 
+ Container app3 Starting 
+ Container app2 Starting 
+ Container cliente Started 
+ Container app1 Started 
+ Container app3 Started 
+ Container app2 Started 
+ Container etcd1 Waiting 
+ Container etcd2 Waiting 
+ Container etcd3 Waiting 
+ Container cliente Waiting 
+ Container app2 Waiting 
+ Container app1 Waiting 
+ Container app3 Waiting 
+ Container app3 Healthy 
+ Container cliente Healthy 
+ Container app1 Healthy 
+ Container app2 Healthy 
+ Container etcd2 Healthy 
+ Container etcd1 Healthy 
+ Container etcd3 Healthy 
+saudável em 0.30 s: líder etcd3, 3 membros respondendo
++------------------+---------+-------+-------------------------+-------------------------+------------+
+|        ID        | STATUS  | NAME  |       PEER ADDRS        |      CLIENT ADDRS       | IS LEARNER |
++------------------+---------+-------+-------------------------+-------------------------+------------+
+| 729febf16625624c | started | etcd2 | http://172.30.0.32:2380 | http://172.31.0.32:2379 |      false |
+| a740cd75718ef0d5 | started | etcd3 | http://172.30.0.33:2380 | http://172.31.0.33:2379 |      false |
+| f7c63021767e3289 | started | etcd1 | http://172.30.0.31:2380 | http://172.31.0.31:2379 |      false |
++------------------+---------+-------+-------------------------+-------------------------+------------+
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+|        ENDPOINT         |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+| http://172.31.0.32:2379 | 729febf16625624c |  3.5.17 |   20 kB |     false |      false |         2 |         22 |                 22 |        |
+| http://172.31.0.33:2379 | a740cd75718ef0d5 |  3.5.17 |   20 kB |      true |      false |         2 |         22 |                 22 |        |
+| http://172.31.0.31:2379 | f7c63021767e3289 |  3.5.17 |   20 kB |     false |      false |         2 |         22 |                 22 |        |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
++-------------------------+--------+------------+-------+
+|        ENDPOINT         | HEALTH |    TOOK    | ERROR |
++-------------------------+--------+------------+-------+
+| http://172.31.0.33:2379 |   true | 1.901284ms |       |
+| http://172.31.0.32:2379 |   true | 2.311244ms |       |
+| http://172.31.0.31:2379 |   true | 2.040818ms |       |
++-------------------------+--------+------------+-------+
+
+>> ambiente pronto em 14.214 s

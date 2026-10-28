@@ -1,0 +1,30 @@
+# Validação funcional: escrita num membro, leitura nos outros, apps reagindo via watch
+# coletado em 2026-10-21 20:17:46 -0300
+
+$ ctl etcd1 put /config/modo teste-pratico-201746
+OK
+
+$ ctl etcd2 get /config/modo
+/config/modo
+teste-pratico-201746
+
+$ ctl etcd3 get /config/modo --consistency=s
+/config/modo
+teste-pratico-201746
+
+$ docker compose logs --no-log-prefix --since 10s app1 app2 app3 | sort
+23:17:38 [app1] rev=6 APLICADA /config/log_level = info
+23:17:38 [app2] rev=6 APLICADA /config/log_level = info
+23:17:38 [app3] rev=6 APLICADA /config/log_level = info
+23:17:46 [app1] rev=10 APLICADA /config/modo = teste-pratico-201746
+23:17:46 [app2] rev=10 APLICADA /config/modo = teste-pratico-201746
+23:17:46 [app3] rev=10 APLICADA /config/modo = teste-pratico-201746
+
+$ ctl etcd1 get /acks/ --prefix
+/acks/app1
+{"rev": 10, "recebido": 1792624666.445656}
+/acks/app2
+{"rev": 10, "recebido": 1792624666.4456835}
+/acks/app3
+{"rev": 10, "recebido": 1792624666.4456952}
+

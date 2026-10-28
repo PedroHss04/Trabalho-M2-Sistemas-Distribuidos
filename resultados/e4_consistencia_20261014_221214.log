@@ -1,0 +1,35 @@
+# e4_consistencia — 2026-10-14 22:12:14 — log em resultados/e4_consistencia_20261014_221214.log
+líder: etcd1   seguidor que será isolado: etcd3
+
+=================== 1. Condições normais: latência de get linearizável x serializável ===================
+leituras em etcd3 (200 de cada, alternadas):
+  linearizável (ms): n=200  média=1.30  desvio=0.29  mín=0.99  máx=2.59
+  serializável (ms): n=200  média=0.81  desvio=0.32  mín=0.52  máx=4.55
+CSV salvo em /resultados/e4_leituras_etcd3_20261015_011216.csv
+leituras em etcd1 (200 de cada, alternadas):
+  linearizável (ms): n=200  média=1.07  desvio=0.39  mín=0.74  máx=3.80
+  serializável (ms): n=200  média=0.82  desvio=0.40  mín=0.51  máx=4.36
+CSV salvo em /resultados/e4_leituras_etcd1_20261015_011216.csv
+
+=================== 2. Isolando etcd3 da rede interna (continua acessível aos clientes) ===================
+22:12:17.492 etcd3 lê (serializável): ANTIGO
+22:12:17.897 etcd3 desconectado da rede interna
+22:12:20.941 put /e4/valor=NOVO pela maioria (etcd1):
+OK
+22:12:21.138 etcd1 lê (linearizável): NOVO
+22:12:21.343 etcd3 lê (serializável):  ANTIGO
+22:12:21.549 etcd3 lê (linearizável):  Error: context deadline exceeded
+22:12:24.761 etcd3 tenta escrever:     Error: context deadline exceeded
+
+>> visão do isolado (endpoint status dele mesmo):
++-----------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+-----------------------+
+|       ENDPOINT        |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX |        ERRORS         |
++-----------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+-----------------------+
+| http://127.0.0.1:2379 | a740cd75718ef0d5 |  3.5.17 |   22 MB |     false |      false |         2 |       9638 |               9638 | etcdserver: no leader |
++-----------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+-----------------------+
+
+=================== 3. Reconectando etcd3: a leitura serializável passa a devolver o valor novo ===================
+pronto: etcd3 termo=2 aplicado=9638
+{"membro": "etcd3", "lider": "etcd1", "termo": 2, "aplicado_membro": 9652, "aplicado_lider": 9652, "reingresso_s": 2.26, "sincronizou_apos_reingresso_ms": 261.4, "total_desde_pronto_s": 2.522}
+22:12:31.471 etcd3 lê (serializável):  NOVO
+22:12:31.670 etcd3 lê (linearizável):  NOVO

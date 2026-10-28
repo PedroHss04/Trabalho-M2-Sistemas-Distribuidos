@@ -1,0 +1,123 @@
+# Trabalho 2 - Sistemas Distribuídos - Tema 5 (etcd) - Ênfase C
+# Cluster etcd com 3 membros + 4º membro opcional (learner) + 3 aplicações de watch + cliente.
+#
+#   docker compose up -d                       -> etcd1..3, app1..3, cliente
+#   docker compose --profile extra up -d etcd4 -> só DEPOIS do "member add --learner" (ver scripts/e9_reconfig.sh)
+#
+# Redes: "interna" = tráfego Raft entre pares (2380); "clientes" = API de clientes (2379).
+#
+# Variável opcional: SNAPSHOT_COUNT (padrão 100000). O E7 parte 2 usa SNAPSHOT_COUNT=1000.
+
+# nome fixo do projeto: as redes ficam t5-etcd-enfasec_interna / _clientes em qualquer pasta
+name: t5-etcd-enfasec
+
+x-etcd: &etcd
+  image: quay.io/coreos/etcd:v3.5.17
+  mem_limit: 256m
+  restart: "no"
+  # a imagem não tem shell; o etcdctl roda direto (exec form). "health" exige quórum.
+  healthcheck:
+    test: ["CMD", "etcdctl", "--endpoints=http://127.0.0.1:2379", "endpoint", "health"]
+    interval: 2s
+    timeout: 3s
+    retries: 30
+
+x-etcd-flags: &etcd-flags
+  ETCD_DATA_DIR: /etcd-data
+  ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
+  ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+  ETCD_INITIAL_CLUSTER_TOKEN: sd-t2
+  ETCD_INITIAL_CLUSTER: etcd1=http://172.30.0.31:2380,etcd2=http://172.30.0.32:2380,etcd3=http://172.30.0.33:2380
+  ETCD_INITIAL_CLUSTER_STATE: new
+  # envia "progress notify" aos watches a cada 5 s: o app percebe conexão morta rápido
+  ETCD_EXPERIMENTAL_WATCH_PROGRESS_NOTIFY_INTERVAL: 5s
+  # snapshot do estado a cada N entradas aplicadas (E7 parte 2 usa 1000)
+  ETCD_SNAPSHOT_COUNT: ${SNAPSHOT_COUNT:-100000}
+  ETCDCTL_API: "3"
+
+x-app: &app
+  image: python:3.12-alpine
+  mem_limit: 64m
+  command: ["python", "-u", "/app/app_watch.py"]
+  volumes: ["./app:/app:ro"]
+  depends_on: [etcd1, etcd2, etcd3]
+
+x-app-env: &app-env
+  ETCD_ENDPOINTS: http://172.31.0.31:2379,http://172.31.0.32:2379,http://172.31.0.33:2379,http://172.31.0.34:2379
+
+services:
+  etcd1:
+    <<: *etcd
+    container_name: etcd1
+    environment:
+      <<: *etcd-flags
+      ETCD_NAME: etcd1
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: http://172.30.0.31:2380
+      ETCD_ADVERTISE_CLIENT_URLS: http://172.31.0.31:2379
+    networks: {interna: {ipv4_address: 172.30.0.31}, clientes: {ipv4_address: 172.31.0.31}}
+
+  etcd2:
+    <<: *etcd
+    container_name: etcd2
+    environment:
+      <<: *etcd-flags
+      ETCD_NAME: etcd2
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: http://172.30.0.32:2380
+      ETCD_ADVERTISE_CLIENT_URLS: http://172.31.0.32:2379
+    networks: {interna: {ipv4_address: 172.30.0.32}, clientes: {ipv4_address: 172.31.0.32}}
+
+  etcd3:
+    <<: *etcd
+    container_name: etcd3
+    environment:
+      <<: *etcd-flags
+      ETCD_NAME: etcd3
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: http://172.30.0.33:2380
+      ETCD_ADVERTISE_CLIENT_URLS: http://172.31.0.33:2379
+    networks: {interna: {ipv4_address: 172.30.0.33}, clientes: {ipv4_address: 172.31.0.33}}
+
+  # 4º membro: entra num cluster EXISTENTE, depois de ser registrado como learner.
+  etcd4:
+    <<: *etcd
+    container_name: etcd4
+    profiles: ["extra"]
+    environment:
+      <<: *etcd-flags
+      ETCD_NAME: etcd4
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: http://172.30.0.34:2380
+      ETCD_ADVERTISE_CLIENT_URLS: http://172.31.0.34:2379
+      ETCD_INITIAL_CLUSTER: etcd1=http://172.30.0.31:2380,etcd2=http://172.30.0.32:2380,etcd3=http://172.30.0.33:2380,etcd4=http://172.30.0.34:2380
+      ETCD_INITIAL_CLUSTER_STATE: existing
+    networks: {interna: {ipv4_address: 172.30.0.34}, clientes: {ipv4_address: 172.31.0.34}}
+
+  app1:
+    <<: *app
+    container_name: app1
+    environment: {<<: *app-env, APP_NAME: app1}
+    networks: {clientes: {ipv4_address: 172.31.0.101}}
+
+  app2:
+    <<: *app
+    container_name: app2
+    environment: {<<: *app-env, APP_NAME: app2}
+    networks: {clientes: {ipv4_address: 172.31.0.102}}
+
+  app3:
+    <<: *app
+    container_name: app3
+    environment: {<<: *app-env, APP_NAME: app3}
+    networks: {clientes: {ipv4_address: 172.31.0.103}}
+
+  # Cliente para rodar os scripts de medição (escritor.py, medir_watch.py)
+  cliente:
+    image: python:3.12-alpine
+    container_name: cliente
+    mem_limit: 64m
+    command: ["sleep", "infinity"]
+    environment: *app-env
+    volumes: ["./app:/app:ro", "./scripts:/scripts:ro", "./resultados:/resultados"]
+    networks: {clientes: {ipv4_address: 172.31.0.100}}
+
+networks:
+  interna: {ipam: {config: [{subnet: 172.30.0.0/24}]}}
+  clientes: {ipam: {config: [{subnet: 172.31.0.0/24}]}}

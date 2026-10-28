@@ -1,0 +1,75 @@
+# e7_recuperacao — 2026-10-14 22:20:22 — log em resultados/e7_recuperacao_20261014_222022.log
+
+=================== Parte 2a: SNAPSHOT_COUNT=1000 (snapshot a cada 1000 entradas; log antigo é compactado) ===================
+saudável em 0.30 s: líder etcd2, 3 membros respondendo
+|        ENDPOINT         |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |
+|        ENDPOINT         | HEALTH |    TOOK    | ERROR |
+líder: etcd2   membro que ficará parado: etcd3
+2000 chaves gravadas
+4000 chaves gravadas
+6000 chaves gravadas
+8000 chaves gravadas
+10000 chaves gravadas
+12000 chaves gravadas
+12000 chaves (~11 MB) em 21.6 s (557 escritas/s, 8 threads)
+resultado: {"membro": "etcd3", "lider": "etcd2", "termo": 2, "aplicado_membro": 12051, "aplicado_lider": 12051, "reingresso_s": 0.53, "sincronizou_apos_reingresso_ms": 0.0, "total_desde_pronto_s": 0.53}
+>> mensagens de snapshot no log do LÍDER (etcd2) desde a parada:
+     12 "msg":"saved snapshot"
+      1 "msg":"sending database snapshot"
+      1 "msg":"sending merged snapshot"
+      1 "msg":"sent database snapshot to writer"
+      1 "msg":"sent database snapshot"
+     12 "msg":"triggering snapshot"
+>> mensagens de snapshot no log do membro que voltou (etcd3):
+      1 "msg":"No snapshot found. Recovering WAL from scratch!"
+      1 "msg":"a740cd75718ef0d5 [commit: 12050, lastindex: 12050, lastterm: 2] restored snapshot [index: 12050, term: 2]"
+      1 "msg":"a740cd75718ef0d5 [commit: 12050] restored snapshot [index: 12050, term: 2]"
+      1 "msg":"applied incoming Raft snapshot"
+      1 "msg":"applied snapshot"
+      1 "msg":"applying snapshot"
+      1 "msg":"log [committed=25, applied=25, unstable.offset=26, len(unstable.Entries)=0] starts to restore snapshot [index: 12050, term: 2]"
+      1 "msg":"received and saved database snapshot"
+      1 "msg":"receiving database snapshot"
+      1 "msg":"saved database snapshot to disk"
+>> linha do tempo do membro que voltou (carimbos do próprio log do etcd):
+   +      0 ms  starting an etcd server
+   +     33 ms  receiving database snapshot
+   +    133 ms  applied snapshot
+   +    135 ms  published local member to cluster through raft
+   +    135 ms  ready to serve client requests
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+|        ENDPOINT         |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+| http://172.31.0.31:2379 | f7c63021767e3289 |  3.5.17 |   17 MB |     false |      false |         2 |      12052 |              12052 |        |
+| http://172.31.0.32:2379 | 729febf16625624c |  3.5.17 |   17 MB |      true |      false |         2 |      12052 |              12052 |        |
+| http://172.31.0.33:2379 | a740cd75718ef0d5 |  3.5.17 |   17 MB |     false |      false |         2 |      12052 |              12052 |        |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+
+=================== Parte 2b: SNAPSHOT_COUNT padrão (100000): o líder ainda tem o log e envia as entradas ===================
+saudável em 0.30 s: líder etcd2, 3 membros respondendo
+|        ENDPOINT         |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |
+|        ENDPOINT         | HEALTH |    TOOK    | ERROR |
+líder: etcd2   membro que ficará parado: etcd3
+2000 chaves gravadas
+4000 chaves gravadas
+6000 chaves gravadas
+8000 chaves gravadas
+10000 chaves gravadas
+12000 chaves gravadas
+12000 chaves (~11 MB) em 21.3 s (564 escritas/s, 8 threads)
+resultado: {"membro": "etcd3", "lider": "etcd2", "termo": 2, "aplicado_membro": 12050, "aplicado_lider": 12050, "reingresso_s": 0.588, "sincronizou_apos_reingresso_ms": 0.0, "total_desde_pronto_s": 0.588}
+>> mensagens de snapshot no log do LÍDER (etcd2) desde a parada:
+   (nenhuma)
+>> mensagens de snapshot no log do membro que voltou (etcd3):
+      1 "msg":"No snapshot found. Recovering WAL from scratch!"
+>> linha do tempo do membro que voltou (carimbos do próprio log do etcd):
+   +      0 ms  starting an etcd server
+   +    236 ms  published local member to cluster through raft
+   +    236 ms  ready to serve client requests
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+|        ENDPOINT         |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
+| http://172.31.0.31:2379 | f7c63021767e3289 |  3.5.17 |   17 MB |     false |      false |         2 |      12050 |              12050 |        |
+| http://172.31.0.32:2379 | 729febf16625624c |  3.5.17 |   17 MB |      true |      false |         2 |      12050 |              12050 |        |
+| http://172.31.0.33:2379 | a740cd75718ef0d5 |  3.5.17 |   17 MB |     false |      false |         2 |      12050 |              12050 |        |
++-------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+

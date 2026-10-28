@@ -1,0 +1,18 @@
+# Ferramentas instaladas (Docker Desktop + WSL 2; nenhuma VM criada pela equipe)
+# coletado em 2026-10-21 20:17:23 -0300
+
+$ docker version --format 'Cliente {{.Client.Version}} / Servidor {{.Server.Version}} ({{.Server.Os}}/{{.Server.Arch}})'
+Cliente 29.8.2 / Servidor 29.8.2 (linux/amd64)
+
+$ docker compose version
+Docker Compose version v5.5.1
+
+$ docker info --format 'SO do engine: {{.OperatingSystem}} | kernel: {{.KernelVersion}} | CPUs: {{.NCPU}} | memória: {{.MemTotal}} bytes | cgroup: {{.CgroupVersion}}'
+SO do engine: Docker Desktop (containerized) | kernel: 6.18.54.1-microsoft-standard-WSL2 | CPUs: 16 | memória: 8287850496 bytes | cgroup: 2
+
+$ git --version
+git version 2.54.0.windows.1
+
+$ bash --version | head -1
+GNU bash, version 5.3.9(1)-release (x86_64-pc-cygwin)
+

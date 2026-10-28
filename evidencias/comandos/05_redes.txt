@@ -1,0 +1,29 @@
+# Redes e endereços (interna = Raft :2380, clientes = API :2379)
+# coletado em 2026-10-21 20:17:41 -0300
+
+$ docker network ls --filter name=t5-etcd-enfasec
+NETWORK ID     NAME                       DRIVER    SCOPE
+a468c2a4c759   t5-etcd-enfasec_clientes   bridge    local
+33a0dc13d039   t5-etcd-enfasec_interna    bridge    local
+
+$ docker inspect -f '{{.Name}} {{range $n, $e := .NetworkSettings.Networks}} {{$n}}={{$e.IPAddress}}{{end}}' etcd1
+/etcd1  t5-etcd-enfasec_clientes=172.31.0.31 t5-etcd-enfasec_interna=172.30.0.31
+
+$ docker inspect -f '{{.Name}} {{range $n, $e := .NetworkSettings.Networks}} {{$n}}={{$e.IPAddress}}{{end}}' etcd2
+/etcd2  t5-etcd-enfasec_clientes=172.31.0.32 t5-etcd-enfasec_interna=172.30.0.32
+
+$ docker inspect -f '{{.Name}} {{range $n, $e := .NetworkSettings.Networks}} {{$n}}={{$e.IPAddress}}{{end}}' etcd3
+/etcd3  t5-etcd-enfasec_clientes=172.31.0.33 t5-etcd-enfasec_interna=172.30.0.33
+
+$ docker inspect -f '{{.Name}} {{range $n, $e := .NetworkSettings.Networks}} {{$n}}={{$e.IPAddress}}{{end}}' app1
+/app1  t5-etcd-enfasec_clientes=172.31.0.101
+
+$ docker inspect -f '{{.Name}} {{range $n, $e := .NetworkSettings.Networks}} {{$n}}={{$e.IPAddress}}{{end}}' app2
+/app2  t5-etcd-enfasec_clientes=172.31.0.102
+
+$ docker inspect -f '{{.Name}} {{range $n, $e := .NetworkSettings.Networks}} {{$n}}={{$e.IPAddress}}{{end}}' app3
+/app3  t5-etcd-enfasec_clientes=172.31.0.103
+
+$ docker inspect -f '{{.Name}} {{range $n, $e := .NetworkSettings.Networks}} {{$n}}={{$e.IPAddress}}{{end}}' cliente
+/cliente  t5-etcd-enfasec_clientes=172.31.0.100
+

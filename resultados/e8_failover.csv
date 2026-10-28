@@ -1,0 +1,13 @@
+recurso,modo,repeticao,espera_s
+lock,kill,1,7.567
+lock,kill,2,10.127
+lock,kill,3,7.903
+lock,kill,4,9.249
+lock,kill,5,7.427
+lock,stop,1,0.495
+elect,kill,1,57.778
+elect,kill,2,60.039
+elect,kill,3,41.577
+elect,kill,4,43.436
+elect,kill,5,45.002
+elect,stop,1,0.476
